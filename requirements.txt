@@ -1,0 +1,17 @@
+attrs==25.3.0
+cdsapi==0.7.6
+certifi==2025.7.9
+charset-normalizer==3.4.2
+ecmwf-api-client==1.6.5
+ecmwf-datastores-client==0.2.0
+idna==3.10
+multiurl==0.3.5
+python-dateutil==2.9.0.post0
+python-dotenv==1.1.1
+pytz==2025.2
+requests==2.32.4
+ruff==0.12.2
+six==1.17.0
+tqdm==4.67.1
+typing_extensions==4.14.1
+urllib3==2.5.0
