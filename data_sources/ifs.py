@@ -9,6 +9,8 @@
 from ecmwf.opendata import Client
 import os
 import xarray as xr
+import cfgrib
+import logging
 
 def download_latest(target: str):
     '''
@@ -27,60 +29,65 @@ def download_latest(target: str):
     result = client.retrieve(
         type='fc',
         step=0,
-        # param=[
-        #         '10u',  # 10 metre U wind component
-        #         '10v',  # 10 metre V wind component
-        #         '2t',   # 2 metre temperature
-        #         'msl',  # Mean sea level pressure
-        #         'ro',   # Runoff
-        #         'skt',  # Skin temperature
-        #         'sp',   # Surface pressure
-        #         # 'st',   # Soil Temperature - Not found?!
-        #         # 'stl1', # Soil temperature level 1 - Not found?!
-        #         'tcwv', # Total column vertically-integrated water vapour 	
-        #         'tp',   # Total Precipitation
-        #     ],
+        param=[
+                # Single level fields
+                
+                '10u',  # 10 metre U wind component
+                '10v',  # 10 metre V wind component
+                '2t',   # 2 metre temperature
+                'msl',  # Mean sea level pressure
+                #'ro',   # Runoff
+                #'skt',  # Skin temperature
+                'sp',   # Surface pressure
+                #'st',   # Soil Temperature - Not found?!
+                #'stl1', # Soil temperature level 1 - Not found?!
+                #'tcwv', # Total column vertically-integrated water vapour 	
+                'tp',   # Total Precipitation
+                
+                # Atmospheric fields on pressure levels
+                
+                #'d',   # Divergence
+                'gh', 	# Geopotential height
+                'q',	# Specific humidity
+                #'r',	# Relative humidity
+                't',	# Temperature 	K
+                'u',	# U component of wind
+                'v',	# V component of wind
+                #'vo', 	# Vorticity (relative)
+            ],
         target=data_file,
     )
     
     iso_format = result.datetime.strftime('%Y-%m-%dT%H:%M:%SZ')
     os.rename(data_file, os.path.join(target, f'{iso_format}.grib2'))
     data_file = os.path.join(target, f'{iso_format}.grib2')
-    return iso_format
-    ds_surface = xr.open_dataset(
-            data_file,
-            engine="cfgrib",
-            decode_timedelta=True,
-            backend_kwargs={"filter_by_keys": {"typeOfLevel": "surface"}}
-    )
     
-    print(ds)
+    logger = logging.getLogger(__file__)
+    logger.info('Converting the obtained .grib2 file into NetCDF4')
+    _grib_to_netcdf4(data_file)
     
-    while True: pass
-    
-    ds_2m = xr.open_dataset(
-        data_file,
-        engine="cfgrib",
-        backend_kwargs={"filter_by_keys": {"typeOfLevel": "heightAboveGround", "level": 2}},
-        decode_timedelta=True
-    )
-    
-    ds_10m = xr.open_dataset(
-        data_file,
-        engine="cfgrib",
-        backend_kwargs={"filter_by_keys": {"typeOfLevel": "heightAboveGround", "level": 10}},
-        decode_timedelta=True
-    )
-    
-    print(ds_10m)
-    
-    #ds_2m = ds_2m.reset_coords('heightAboveGround', drop=True)
-    #ds_10m = ds_10m.reset_coords('heightAboveGround', drop=True)
-
-    combined = xr.merge([ds_2m, ds_10m])
-
-    combined.to_netcdf(os.path.splitext(data_file)[0] + '.nc')
     return iso_format
 
-if __name__ == '__main__':
-    pass
+def _grib_to_netcdf4(grib_path: str):
+    dss = cfgrib.open_datasets(grib_path, decode_timedelta=True)
+    
+    # Remove the 'heightAboveGround' coordinate that's messing up the merging
+    # of all single-layer variables into a single file.
+    for i in range(len(dss)):
+        if 'heightAboveGround' in dss[i].coords:
+            dss[i] = dss[i].drop_vars('heightAboveGround')
+            
+    pressures = []
+    singles= []
+
+    for ds in dss:
+        if 'isobaricInhPa' in ds.coords:
+            pressures.append(ds)
+        else:
+            singles.append(ds)
+
+    pressures = xr.merge(pressures)
+    singles = xr.merge(singles)
+    
+    pressures.to_netcdf(os.path.splitext(grib_path)[0] + '-pressure.nc')
+    singles.to_netcdf(os.path.splitext(grib_path)[0] + '-single.nc')
