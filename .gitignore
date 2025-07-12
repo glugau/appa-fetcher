@@ -2,3 +2,4 @@
 venv/
 .ruff_cache/
 data/
+*.pyc

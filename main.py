@@ -1,60 +1,43 @@
 import os
 from dotenv import load_dotenv
-import cdsapi
-import requests
+import data_sources
+import argparse
+import importlib
+import logging
 
-load_dotenv() # development
+load_dotenv() # development (API keys)
 
-DATA_FOLDER = os.environ['DATA_FOLDER']
-CDS_API_KEY = os.environ['CDS_API_KEY']
+AVAILABLE_SOURCES = ['era5', 'ifs']
 
-# Save the API key (env var) to the ~/.cdsapirc file (as required by the spec)
-with open(os.path.expandvars("$HOME/.cdsapirc"), "w+") as f:
-    f.write(f'url: https://cds.climate.copernicus.eu/api\nkey: {CDS_API_KEY}')
+parser = argparse.ArgumentParser()
+parser.add_argument('-t', '--target-folder',
+                    required=False, default='./data',
+                    dest='target_folder',
+                    help=('Destination output folder of the NetCDF4 files.The'
+                          'files will be in a subfolder bearing the name of '
+                          'the data source.'))
+parser.add_argument('-s', '--data-source', required=False, default='era5',
+                    help=('The database/algorithm to fetch from. '
+                          f'Available options are: {', '.join(AVAILABLE_SOURCES)}.'))
+
+args = parser.parse_args()
+
+# Disable the internal logger of ECMWF, which causes duplicate logs.
+logger = logging.getLogger(__name__)
+logging.getLogger('ecmwf.datastores.legacy_client').propagate = False
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s %(levelname)s %(message)s',
+    force=True
+)
+
+target = os.path.join(args.target_folder, args.data_source)
+
+logger.info(f'Fetching the latest data from {args.data_source} into the folder {target}')
+
+if not os.path.exists(target):
+    os.makedirs(target)
     
-if not os.path.exists(DATA_FOLDER):
-    os.makedirs(DATA_FOLDER)
-
-def get_latest_datetime():
-    """_summary_
-    Get the latest datetime available for the era5 hourly dataset.
-    Returns:
-        tuple(str): year, month, day, hour, minute
-    """
-    r = requests.get("https://cds.climate.copernicus.eu/api/catalogue/v1/collections/reanalysis-era5-single-levels")
-    json = r.json()
-    latest = json['extent']['temporal']['interval'][0][1]
-    date = str(latest).split('T')[0].split('-')
-    time = str(latest).split('T')[1].split(':')
-    return date[0], date[1], date[2], time[0], time[1]
-
-latest_datetime = get_latest_datetime()
-filename = f'{latest_datetime[0]}-{latest_datetime[1]}-{latest_datetime[2]} {latest_datetime[3]}:{latest_datetime[4]}.zip'
-target_file = os.path.join(DATA_FOLDER, filename)
-
-dataset = "reanalysis-era5-single-levels"
-request = {
-    "product_type": ["reanalysis"],
-    "variable": [
-        "10m_u_component_of_wind",
-        "10m_v_component_of_wind",
-        "2m_dewpoint_temperature",
-        "2m_temperature",
-        "mean_sea_level_pressure",
-        "mean_wave_direction",
-        "mean_wave_period",
-        "sea_surface_temperature",
-        "significant_height_of_combined_wind_waves_and_swell",
-        "surface_pressure",
-        "total_precipitation"
-    ],
-    "year": [latest_datetime[0]],
-    "month": [latest_datetime[1]],
-    "day": [latest_datetime[2]],
-    "time": [f'{latest_datetime[3]}:{latest_datetime[4]}'],
-    "data_format": "netcdf",
-    "download_format": "zip"
-}
-
-client = cdsapi.Client()
-client.retrieve(dataset, request).download(target=target_file)
+data_source = importlib.import_module(f'data_sources.{args.data_source}')
+datetime = data_source.download_latest(target)
+logger.info(f'Successfuly downloaded data from timestamp {datetime}')
