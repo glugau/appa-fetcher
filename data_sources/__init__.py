@@ -1,2 +1,1 @@
-from . import era5
-from . import ifs
+from . import era5, ifs, gfs

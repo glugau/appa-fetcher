@@ -28,7 +28,7 @@ def download_latest(target: str):
     
     datetime = _latest_datetime()
     
-    logger = logging.getLogger(__file__)
+    logger = logging.getLogger(__name__)
     logger.info(f'Found latest datetime: {datetime}')
     logger.info(f'Downloading pressure levels for {datetime}...')
     _download_latest_pressure_levels(target, datetime)

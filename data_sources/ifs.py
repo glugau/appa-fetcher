@@ -14,9 +14,8 @@ import logging
 
 def download_latest(target: str):
     '''
-    Download the latest relevant files given by the ifs model.
-    In order for this function to work, a CDS API key must be provided as an
-    environment variable called CDS_API_KEY (https://cds.climate.copernicus.eu).
+    Download the latest relevant files given by the IFS model. No API key is
+    required for this model.
         
         Parameters:
             - target(str): The target output **folder**.
@@ -62,7 +61,7 @@ def download_latest(target: str):
     os.rename(data_file, os.path.join(target, f'{iso_format}.grib2'))
     data_file = os.path.join(target, f'{iso_format}.grib2')
     
-    logger = logging.getLogger(__file__)
+    logger = logging.getLogger(__name__)
     logger.info('Converting the obtained .grib2 file into NetCDF4')
     _grib_to_netcdf4(data_file)
     
