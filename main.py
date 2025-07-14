@@ -1,9 +1,9 @@
 import os
 from dotenv import load_dotenv
-import data_sources
 import argparse
 import importlib
 import logging
+import process_data
 
 load_dotenv() # development (API keys)
 
@@ -16,9 +16,9 @@ parser.add_argument('-t', '--target-folder',
                     help=('Destination output folder of the NetCDF4 files.The'
                           'files will be in a subfolder bearing the name of '
                           'the data source.'))
-parser.add_argument('-s', '--data-source', required=False, default='era5',
-                    help=('The database/algorithm to fetch from. '
-                          f'Available options are: {', '.join(AVAILABLE_SOURCES)}.'))
+# parser.add_argument('-s', '--data-source', required=False, default='era5',
+#                     help=('The database/algorithm to fetch from. '
+#                           f'Available options are: {', '.join(AVAILABLE_SOURCES)}.'))
 
 args = parser.parse_args()
 
@@ -31,13 +31,20 @@ logging.basicConfig(
     force=True
 )
 
-target = os.path.join(args.target_folder, args.data_source)
+SOURCES = ['ifs', 'era5']
 
-logger.info(f'Fetching the latest data from {args.data_source} into the folder {target}')
-
-if not os.path.exists(target):
-    os.makedirs(target)
+for source in SOURCES:
+    target = os.path.join(args.target_folder, source)
+    logger.info(f'Fetching the latest data from {source} into the folder {target}')
+    if not os.path.exists(target):
+        os.makedirs(target)
+    data_source = importlib.import_module(f'data_sources.{source}')
+    datetime = data_source.download_latest(target)
+    logger.info(f'Successfuly downloaded data from timestamp {datetime}')
     
-data_source = importlib.import_module(f'data_sources.{args.data_source}')
-datetime = data_source.download_latest(target)
-logger.info(f'Successfuly downloaded data from timestamp {datetime}')
+logger.info('All files downloaded. Processing the data')
+process_data.process_data(
+    os.path.join(args.target_folder, 'era5'),
+    os.path.join(args.target_folder, 'ifs'),
+    os.path.join(args.target_folder, 'processed')
+)

@@ -6,6 +6,7 @@ import requests
 import cdsapi
 import logging
 from datetime import datetime
+import zipfile
 
 def download_latest(target: str):
     '''
@@ -75,6 +76,14 @@ def _download_latest_pressure_levels(target, datetime):
 
     client = cdsapi.Client()
     client.retrieve(dataset, request).download(target=path)
+    
+    filename_in_zip = 'data_stream-oper_stepType-instant.nc'
+    
+    with zipfile.ZipFile(path, 'r') as z:
+        z.extract(filename_in_zip,
+                  path=target)
+    
+    os.rename(os.path.join(target, filename_in_zip), os.path.splitext(path)[0] + '.nc')
 
 def _download_latest_single_levels(target, datetime):
     '''
@@ -109,6 +118,14 @@ def _download_latest_single_levels(target, datetime):
 
     client = cdsapi.Client()
     client.retrieve(dataset, request).download(target=path)
+    
+    filename_in_zip = 'data_stream-oper_stepType-instant.nc'
+    
+    with zipfile.ZipFile(path, 'r') as z:
+        z.extract(filename_in_zip,
+                  path=target)
+    
+    os.rename(os.path.join(target, filename_in_zip), os.path.splitext(path)[0] + '.nc')
 
 
 def _latest_datetime():
