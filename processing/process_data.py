@@ -2,6 +2,7 @@ import os
 import xarray as xr
 from datetime import datetime, timezone
 import logging
+from . import shift_longitude
 
 def process_data(era5_data_folder, ifs_data_folder, target_folder):
     '''
@@ -18,6 +19,9 @@ def process_data(era5_data_folder, ifs_data_folder, target_folder):
     ds_ifs_s = xr.open_dataset(path_ifs_s, engine='netcdf4')
     ds_era5_s = xr.open_dataset(path_era5_s, engine='netcdf4').squeeze("valid_time", drop=True)
     logger.info('Loaded all required netCDF files for processing')
+    
+    logger.info('Shifting longitudes to a common range')
+    shift_longitude.shift_longitude(ds_era5_s, '-180-180')
     
     sst = ds_era5_s['sst']
     

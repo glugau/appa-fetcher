@@ -3,7 +3,7 @@ from dotenv import load_dotenv
 import argparse
 import importlib
 import logging
-import process_data
+import processing
 
 load_dotenv() # development (API keys)
 
@@ -16,6 +16,10 @@ parser.add_argument('-t', '--target-folder',
                     help=('Destination output folder of the NetCDF4 files.The'
                           'files will be in a subfolder bearing the name of '
                           'the data source.'))
+parser.add_argument('--skip-download', action='store_true',
+                    help='If set, skip the download step.')
+parser.add_argument('--skip-processing', action='store_true',
+                    help='If set, skip the processing step.')
 # parser.add_argument('-s', '--data-source', required=False, default='era5',
 #                     help=('The database/algorithm to fetch from. '
 #                           f'Available options are: {', '.join(AVAILABLE_SOURCES)}.'))
@@ -31,20 +35,27 @@ logging.basicConfig(
     force=True
 )
 
-SOURCES = ['ifs', 'era5']
+if not args.skip_download:
+    SOURCES = ['ifs', 'era5']
 
-for source in SOURCES:
-    target = os.path.join(args.target_folder, source)
-    logger.info(f'Fetching the latest data from {source} into the folder {target}')
-    if not os.path.exists(target):
-        os.makedirs(target)
-    data_source = importlib.import_module(f'data_sources.{source}')
-    datetime = data_source.download_latest(target)
-    logger.info(f'Successfuly downloaded data from timestamp {datetime}')
-    
-logger.info('All files downloaded. Processing the data')
-process_data.process_data(
-    os.path.join(args.target_folder, 'era5'),
-    os.path.join(args.target_folder, 'ifs'),
-    os.path.join(args.target_folder, 'processed')
-)
+    for source in SOURCES:
+        target = os.path.join(args.target_folder, source)
+        logger.info(f'Fetching the latest data from {source} into the folder {target}')
+        if not os.path.exists(target):
+            os.makedirs(target)
+        data_source = importlib.import_module(f'data_sources.{source}')
+        datetime = data_source.download_latest(target)
+        logger.info(f'Successfuly downloaded data from timestamp {datetime}')
+    logger.info('All files downloaded')
+else:
+    logger.info('Skipping the download step')
+
+if not args.skip_processing:
+    logger.info('Processing the data')
+    processing.process_data(
+        os.path.join(args.target_folder, 'era5'),
+        os.path.join(args.target_folder, 'ifs'),
+        os.path.join(args.target_folder, 'processed')
+    )
+else:
+    logger.info('Skipping the processing step')
