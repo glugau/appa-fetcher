@@ -12,8 +12,6 @@ import re
 import requests
 import logging
 import os
-import cfgrib
-import xarray as xr
 
 def download_latest(target: str) -> str:
     '''
@@ -28,18 +26,18 @@ def download_latest(target: str) -> str:
     '''
 
     # https://www.nco.ncep.noaa.gov/pmb/products/gfs/gfs.t00z.pgrb2.0p25.f000.shtml
-    PARAMS = [
-        'TMP',      # Temperature
-        'UGRD',     # U-Component of wind
-        'VGRD',     # V-Component of wind
-        'HGT',      # Geopotential height
-        'SPFH',     # Specific humidity
-        'PRMSL',    # Pressure Reduced to mean sea level
-        'PRATE',    # Precipitation Rate [kg/m^2/s] - can't find total because only in next forecast files (needs accumulation)
-        # 'APCP' 	# ONLY IN f003+ - Total Precipitation [kg/m^2] 
-        # 'DSWRF',	# ONLY IN f003+ - Downward Short-Wave Radiation Flux [W/m^2]
+    # PARAMS = [
+    #     'TMP',      # Temperature
+    #     'UGRD',     # U-Component of wind
+    #     'VGRD',     # V-Component of wind
+    #     'HGT',      # Geopotential height
+    #     'SPFH',     # Specific humidity
+    #     'PRMSL',    # Pressure Reduced to mean sea level
+    #     'PRATE',    # Precipitation Rate [kg/m^2/s] - can't find total because only in next forecast files (needs accumulation)
+    #     # 'APCP' 	# ONLY IN f003+ - Total Precipitation [kg/m^2] 
+    #     # 'DSWRF',	# ONLY IN f003+ - Downward Short-Wave Radiation Flux [W/m^2]
         
-    ]
+    # ]
     
     base = 'https://nomads.ncep.noaa.gov/pub/data/nccf/com/gfs/prod/'
     logger = logging.getLogger(__name__)
@@ -101,8 +99,8 @@ def download_latest(target: str) -> str:
         
     return datetime
 
-def _grib_to_netcdf4(grib_path: str) -> None:
-    dss = cfgrib.open_datasets(grib_path, decode_timedelta=True)
+# def _grib_to_netcdf4(grib_path: str) -> None:
+#     dss = cfgrib.open_datasets(grib_path, decode_timedelta=True)
 
 if __name__ == '__main__':
     download_latest('')
