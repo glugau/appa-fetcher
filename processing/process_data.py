@@ -4,7 +4,9 @@ from datetime import datetime, timezone
 import logging
 from . import shift_longitude
 
-def process_data(era5_data_folder, ifs_data_folder, target_folder):
+def process_data(era5_data_folder: str, 
+                 ifs_data_folder: str, 
+                 target_folder: str) -> None:
     '''
     Imports the latest data from IFS, the latest data from ERA5, and concatenates
     them so that the latest ERA5 sea surface temperature is given along with the
@@ -41,12 +43,12 @@ def process_data(era5_data_folder, ifs_data_folder, target_folder):
         os.makedirs(target_folder)
     ds_merged.to_netcdf(target_path)
 
-def _get_latest_era5(data_folder):
+def _get_latest_era5(data_folder: str) -> tuple[str, str]:
     '''
     Gets the latest ifs data file that has been downloaded.
 
-        Returns:
-            - (pressure_path, single_path): A tuple of paths to a pressure and
+    Returns:
+        (pressure_path, single_path) (str, str): A tuple of paths to a pressure and
             single level file.
     '''
     pressure_files = [f for f in os.listdir(data_folder) if f.endswith("pressure.nc")]
@@ -57,12 +59,12 @@ def _get_latest_era5(data_folder):
     
     return pressure_file, single_file
 
-def _get_latest_ifs(data_folder):
+def _get_latest_ifs(data_folder: str) -> tuple[str, str]:
     '''
     Gets the latest ifs data file that has been downloaded.
 
-        Returns:
-            - (pressure_path, single_path): A tuple of paths to a pressure and
+    Returns:
+        (pressure_path, single_path) (str, str): A tuple of paths to a pressure and
             single level file.
     '''
     pressure_files = [f for f in os.listdir(data_folder) if f.endswith("pressure.nc")]

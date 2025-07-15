@@ -8,16 +8,16 @@ import logging
 from datetime import datetime
 import zipfile
 
-def download_latest(target: str):
+def download_latest(target: str) -> str:
     '''
     Download the latest relevant files given by the era5 model.
     In order for this function to work, a CDS API key must be provided as an
     environment variable called CDS_API_KEY (https://cds.climate.copernicus.eu).
         
-        Parameters:
-            - target(str): The target output **folder**.
-        Returns:
-            - datetime(str): The date and time of the downloaded data, in ISO
+    Parameters:
+        target (str): The target output **folder**.
+    Returns:
+        datetime(str): The date and time of the downloaded data, in ISO
             8601 format (YYYY-mm-ddTHH-MMZ).
     '''
     
@@ -37,7 +37,7 @@ def download_latest(target: str):
     _download_latest_single_levels(target, datetime)
     return datetime
 
-def _download_latest_pressure_levels(target, datetime):
+def _download_latest_pressure_levels(target: str, datetime: str):
     '''
     Download the latest pressure levels. See
     [here](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels)
@@ -85,7 +85,7 @@ def _download_latest_pressure_levels(target, datetime):
     
     os.rename(os.path.join(target, filename_in_zip), os.path.splitext(path)[0] + '.nc')
 
-def _download_latest_single_levels(target, datetime):
+def _download_latest_single_levels(target: str, datetime: str):
     '''
     Download the latest single levels. See
     [here](https://cds.climate.copernicus.eu/datasets/reanalysis-era5-pressure-levels)
@@ -128,7 +128,7 @@ def _download_latest_single_levels(target, datetime):
     os.rename(os.path.join(target, filename_in_zip), os.path.splitext(path)[0] + '.nc')
 
 
-def _latest_datetime():
+def _latest_datetime() -> str:
     '''
     Get the latest datetime available for the era5 hourly dataset.
     Returns:

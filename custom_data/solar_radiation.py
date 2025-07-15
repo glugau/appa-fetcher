@@ -4,7 +4,9 @@ import xarray as xr
 
 TSI = 1361 # W m^-2
 
-def toa_solar_radiation(latitude_degrees, longitude_degrees, datetime: datetime):
+def toa_solar_radiation(latitude_degrees: float | np.ndarray, 
+                        longitude_degrees: float | np.ndarray,
+                        datetime: datetime) -> float | np.ndarray:
     '''
     Approximate TOA solar radiation at given latitude, longitude, and datetime.
     Ignores TSI variability and equation of time.
@@ -23,7 +25,10 @@ def toa_solar_radiation(latitude_degrees, longitude_degrees, datetime: datetime)
         hour_angle_degrees(datetime, longitude_degrees)
     ), 0)
 
-def integrated_toa_solar_radiation(latitude_degrees, longitude_degrees, datetime, hours):
+def integrated_toa_solar_radiation(latitude_degrees: float | np.ndarray,
+                                   longitude_degrees: float | np.ndarray,
+                                   datetime: datetime,
+                                   hours: int) -> float | np.ndarray: 
     '''
     Integrate TOA solar radiation over a period (hours) using trapezoidal rule.
     Valid for short durations (~1 hour).
@@ -49,7 +54,18 @@ def integrated_toa_solar_radiation(latitude_degrees, longitude_degrees, datetime
     )
     return hours * 3600 * (toa_b + toa_a) / 2
 
-def xarray_integrated_toa_solar_radiation(datetime, hours=1) -> xr.DataArray:
+def xarray_integrated_toa_solar_radiation(datetime: datetime,
+                                          hours: int = 1) -> xr.DataArray:
+    '''
+    Get integrated TOA solar radiation for the whole earth at some datetime as
+    an xarray.
+    
+    Params:
+        datetime (datetime): Time of calculation
+        hours (float): Duration of integration in hours
+    Returns:
+        xarray.DataArray: The generated data
+    '''
     lats = np.arange(-90, 90, 0.25)
     lons = np.arange(-180, 180, 0.25)
     toa_radiation_vec = np.vectorize(integrated_toa_solar_radiation)
@@ -67,7 +83,9 @@ def xarray_integrated_toa_solar_radiation(datetime, hours=1) -> xr.DataArray:
     )
     return toa_da
     
-def cos_solar_zenith_angle(latitude_degrees, declination_degrees, hour_angle_degrees):
+def cos_solar_zenith_angle(latitude_degrees: float | np.ndarray,
+                           declination_degrees: float | np.ndarray,
+                           hour_angle_degrees: float) -> float | np.ndarray:
     '''
     Get the cosine of the solar zenith angle.
     Formula found [here](https://en.wikipedia.org/wiki/Solar_zenith_angle).
@@ -77,27 +95,41 @@ def cos_solar_zenith_angle(latitude_degrees, declination_degrees, hour_angle_deg
     h = np.deg2rad(hour_angle_degrees)
     return np.sin(phi) * np.sin(delta) + np.cos(phi) * np.cos(delta) * np.cos(h)
 
-def declination_angle_degrees(day_of_year):
+def declination_angle_degrees(day_of_year: int) -> float:
     '''
     Get the declination angle, in degrees.
     Formula found [here](https://www.pveducation.org/pvcdrom/properties-of-sunlight/declination-angle).
     
-        Params:
-            - day_of_year(int): day of year, with Jan 1 as d = 1.
-        Returns:
-            - declination_angle_degrees(float): The declination angle, in degrees.
+    Params:
+        day_of_year (int): Day of year, with Jan 1 as d = 1.
+    Returns:
+        float: The declination angle, in degrees.
     '''
     return -23.45 * np.cos(np.deg2rad((360/365) * (day_of_year + 10)))
 
-def utc_decimal_hours(dt: datetime):
+def utc_decimal_hours(dt: datetime) -> float:
+    '''
+    Gives the hour of the day as a decimal number.
+    
+    Params:
+        dt (datetime): The date & time
+    Returns:
+        float: The hour of the day as a decimal number
+    '''
     dt_utc = dt.astimezone(timezone.utc)
     return dt_utc.hour + dt_utc.minute / 60 + dt_utc.second / 3600
 
-def hour_angle_degrees(datetime, longitude_degrees):
+def hour_angle_degrees(datetime: datetime, 
+                       longitude_degrees: float | np.ndarray) -> float:
     '''Get the hour angle, in degrees, for a given datetime object.
     Formulas found [here](https://www.pveducation.org/pvcdrom/properties-of-sunlight/solar-time).
-        Params:
-            - datetime(datetime): The datetime at which t
+    
+    Params:
+        datetime (datetime): Time of calculation
+        longitude_degrees (float or np.array): Longitude(s) in degree
+    Returns:
+        float: The hour angle that corresponds to the datetime and longitude
+            provided.
     '''
     utc_hours = utc_decimal_hours(datetime)
     return 15 * (utc_hours + longitude_degrees/15 - 12)

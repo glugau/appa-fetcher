@@ -12,15 +12,15 @@ import xarray as xr
 import cfgrib
 import logging
 
-def download_latest(target: str):
+def download_latest(target: str) -> str:
     '''
     Download the latest relevant files given by the IFS model. No API key is
     required for this model.
         
-        Parameters:
-            - target(str): The target output **folder**.
-        Returns:
-            - datetime(str): The date and time of the downloaded data, in ISO
+    Parameters:
+        target (str): The target output **folder**.
+    Returns:
+        datetime (str): The date and time of the downloaded data, in ISO
             8601 format (YYYY-mm-ddTHH-MMZ).
     '''
     data_file = os.path.join(target, 'data.grib2')
@@ -68,7 +68,7 @@ def download_latest(target: str):
     
     return iso_format
 
-def _grib_to_netcdf4(grib_path: str):
+def _grib_to_netcdf4(grib_path: str) -> None:
     dss = cfgrib.open_datasets(grib_path, decode_timedelta=True)
     
     # Remove the 'heightAboveGround' coordinate that's messing up the merging

@@ -1,11 +1,13 @@
-def shift_longitude(dataset, range='-180-180'):
+import xarray as xr
+
+def shift_longitude(dataset: xr.Dataset, range:str ='-180-180') -> xr.Dataset:
     '''
     For each field in a given dataset, shift each longitude value to go in the
     desired `range`.
     
-        Parameters:
-            - dataset(xarray): the dataset to be modified
-            - range: `-180-180` or `0-360`. The desired final range of the longitude
+    Parameters:
+        dataset (xr.Dataset): the dataset to be modified
+        range (`-180-180` or `0-360`): The desired final range of the longitude
             values
     '''
     lon = dataset.coords['longitude']
