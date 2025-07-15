@@ -36,7 +36,7 @@ def download_latest(target: str):
                 '2t',   # 2 metre temperature
                 'msl',  # Mean sea level pressure
                 #'ro',   # Runoff
-                #'skt',  # Skin temperature
+                'skt',  # Skin temperature
                 #'sp',   # Surface pressure
                 #'st',   # Soil Temperature - Not found?!
                 #'stl1', # Soil temperature level 1 - Not found?!
