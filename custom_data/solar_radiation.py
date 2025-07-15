@@ -68,7 +68,6 @@ def xarray_integrated_toa_solar_radiation(datetime: datetime,
     '''
     lats = np.arange(-90, 90, 0.25)
     lons = np.arange(-180, 180, 0.25)
-    toa_radiation_vec = np.vectorize(integrated_toa_solar_radiation)
     lon_grid, lat_grid = np.meshgrid(lons, lats)
     values = integrated_toa_solar_radiation(lat_grid, lon_grid, datetime, hours)
     toa_da = xr.DataArray(
