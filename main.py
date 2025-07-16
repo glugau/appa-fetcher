@@ -57,7 +57,8 @@ if not args.skip_download:
         if source == 'ifs':
             ifs_datetime = datetime
     logger.info('All files downloaded')
-else:
+
+if ifs_datetime is None:
     logger.info('Skipping download...')
     ifs_datetime = processing.latest_datetime(
         os.path.join(args.target_folder, f'ifs{RAW_SUFFIX}')
