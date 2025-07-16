@@ -5,7 +5,7 @@ A service that pulls data from online sources on which the APPA model is then co
 ## Usage
 
 ```bash
-python main.py [-h] [-t TARGET_FOLDER] [--skip-download] [--skip-processing]
+python main.py [-h] [-t TARGET_FOLDER] [--skip-processing] [--cleanup]
 ```
 
 ## API key requirements
@@ -14,7 +14,6 @@ python main.py [-h] [-t TARGET_FOLDER] [--skip-download] [--skip-processing]
 |-------------|-------------------|--------------------------|
 | ifs         | No                | /                        |
 | era5        | Yes               | CDS_API_KEY              |
-<!-- | gfs (unused)| No                | /                        | -->
 
 Note that `era5` also requires accepting the terms and conditions. On first try, an error message should guide you to do so.
 
@@ -24,6 +23,6 @@ Note that `era5` also requires accepting the terms and conditions. On first try,
     Show an help message and exit.
 
 - **-t, --target-folder** _TARGET_FOLDER_: Destination output folder for the NetCDF4 files. Files will be saved in a subfolder named after the data source. The name of the data files will be the timestamp of the time at which they were generated, in the format `YY-mm-ddTHH-MM-SSZ`. Default is `./data`.
-- **--skip-download**: If set, skip the download step.
 - **--skip-processing**: If set, skip the processing step.
-<!-- - **-s, --data-source** _DATA_SOURCE_: The database or algorithm to fetch data from. Available options: `era5`, `ifs`, `gfs`. Default is `era5`. -->
+- **--skip-download**: If set, will skip the downloads and look straight for cached data files. Will throw an exception if none are found.
+- **--cleanup**: If set, will delete the `ifs_raw` and `era5_raw` folders inside _TARGET_FOLDER_, only keeping the `processed` files.

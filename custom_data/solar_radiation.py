@@ -67,14 +67,14 @@ def xarray_integrated_toa_solar_radiation(datetime: datetime,
         xarray.DataArray: The generated data
     '''
     lats = np.arange(-90, 90, 0.25)
-    lons = np.arange(-180, 180, 0.25)
+    lons = np.arange(0, 360, 0.25)
     lon_grid, lat_grid = np.meshgrid(lons, lats)
-    values = integrated_toa_solar_radiation(lat_grid, lon_grid, datetime, hours)
+    values = integrated_toa_solar_radiation(lat_grid, lon_grid, datetime, hours).astype(np.float32)
     toa_da = xr.DataArray(
         values,
         coords={"latitude": lats, "longitude": lons},
         dims=["latitude", "longitude"],
-        name="toa_radiation",
+        name="toa_incident_solar_radiation",
         attrs={
             "units": "J m-2",
             "long_name": "Hourly TOA solar radiation"

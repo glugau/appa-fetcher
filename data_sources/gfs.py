@@ -8,6 +8,8 @@
 #   https://registry.opendata.aws/noaa-gfs-bdp-pds/
 #   https://www.nco.ncep.noaa.gov/pmb/products/gfs/
 
+# THIS FILE IS NOT SUPPOSED TO BE USED AND PROBABLY DOES NOT WORK
+
 import re
 import requests
 import logging

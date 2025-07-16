@@ -11,8 +11,9 @@ import os
 import xarray as xr
 import cfgrib
 import logging
+from datetime import datetime, timezone
 
-def download_latest(target: str) -> str:
+def download_latest(target: str) -> datetime:
     '''
     Download the latest relevant files given by the IFS model. No API key is
     required for this model.
@@ -20,8 +21,7 @@ def download_latest(target: str) -> str:
     Parameters:
         target (str): The target output **folder**.
     Returns:
-        datetime (str): The date and time of the downloaded data, in ISO
-            8601 format (YYYY-mm-ddTHH-MMZ).
+        datetime: The date and time of the downloaded data
     '''
     data_file = os.path.join(target, 'data.grib2')
     client = Client(model='ifs')
@@ -36,13 +36,13 @@ def download_latest(target: str) -> str:
                 '2t',   # 2 metre temperature
                 'msl',  # Mean sea level pressure
                 #'ro',   # Runoff
-                'skt',  # Skin temperature
+                #'skt',  # Skin temperature
                 #'sp',   # Surface pressure
                 #'st',   # Soil Temperature - Not found?!
                 #'stl1', # Soil temperature level 1 - Not found?!
                 #'tcwv', # Total column vertically-integrated water vapour 	
                 'tp',   # Total Precipitation
-                'ssr',
+                #'ssr', # Doesn't work
                 
                 # Atmospheric fields on pressure levels
                 
@@ -57,7 +57,7 @@ def download_latest(target: str) -> str:
             ],
         target=data_file,
     )
-    
+        
     iso_format = result.datetime.strftime('%Y-%m-%dT%H:%M:%SZ')
     os.rename(data_file, os.path.join(target, f'{iso_format}.grib2'))
     data_file = os.path.join(target, f'{iso_format}.grib2')
@@ -66,7 +66,7 @@ def download_latest(target: str) -> str:
     logger.info('Converting the obtained .grib2 file into NetCDF4')
     _grib_to_netcdf4(data_file)
     
-    return iso_format
+    return result.datetime.replace(tzinfo=timezone.utc)
 
 def _grib_to_netcdf4(grib_path: str) -> None:
     dss = cfgrib.open_datasets(grib_path, decode_timedelta=True)
