@@ -23,8 +23,8 @@ parser.add_argument('--skip-processing', action='store_true',
 parser.add_argument('--skip-download', action='store_true',
                     help=('If set, skip the download step and use cached files.'
                           ' If none are available, there will be an exception.'))
-parser.add_argument('--cleanup', action='store_true',
-                    help=('If set, delete all files only relevant to a single'
+parser.add_argument('-c', '--cleanup', action='store_true',
+                    help=('If set, delete all files only relevant to a single '
                           'dataset, keeping only processed files. Using this '
                           'along with --skip-download will download the files '
                           'then immediately delete them.'))
