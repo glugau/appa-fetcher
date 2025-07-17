@@ -26,7 +26,7 @@ def process_data(era5_data_folder: str,
     # Retrieve the date and time of the IFS data
     dt = latest_datetime(ifs_data_folder)
     dt_str = dt.isoformat(timespec='seconds').replace('+00:00', 'Z')
-    dt_np = np.datetime64(dt)
+    dt_np = np.datetime64(dt.replace(tzinfo=None), 'ns')
     
     ds_ifs_p = shift_longitude.shift_longitude(
         xr.open_dataset(path_ifs_p, engine='netcdf4'), '0-360')
@@ -121,6 +121,7 @@ def process_data(era5_data_folder: str,
         os.makedirs(target_folder)
         
     ds.to_zarr(target_path, mode='w')
+    print(ds)
 
 def latest_datetime(ifs_data_folder : str) -> datetime:
     path_pressure = _get_latest_ifs(ifs_data_folder)[0]
