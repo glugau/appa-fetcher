@@ -121,7 +121,6 @@ def process_data(era5_data_folder: str,
         os.makedirs(target_folder)
         
     ds.to_zarr(target_path, mode='w')
-    print(ds)
 
 def latest_datetime(ifs_data_folder : str) -> datetime:
     path_pressure = _get_latest_ifs(ifs_data_folder)[0]
