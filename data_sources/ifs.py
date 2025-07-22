@@ -85,11 +85,12 @@ def _grib_to_netcdf4(grib_path: str) -> None:
             pressures.append(ds)
         else:
             singles.append(ds)
-            
-    pressures['gh'] = pressures['gh'] * 9.81
 
     pressures = xr.merge(pressures)
     singles = xr.merge(singles)
+
+    if 'gh' in pressures.variables:
+        pressures['gh'] = pressures['gh'] * 9.81
     
     pressures.to_netcdf(os.path.splitext(grib_path)[0] + '-pressure.nc')
     singles.to_netcdf(os.path.splitext(grib_path)[0] + '-single.nc')
