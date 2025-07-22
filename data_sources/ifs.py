@@ -47,7 +47,7 @@ def download_latest(target: str) -> datetime:
                 # Atmospheric fields on pressure levels
                 
                 #'d',   # Divergence
-                'gh', 	# Geopotential height
+                'z', 	# Geopotential height
                 'q',	# Specific humidity
                 #'r',	# Relative humidity
                 't',	# Temperature 	K
