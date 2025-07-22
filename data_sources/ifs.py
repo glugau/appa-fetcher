@@ -47,7 +47,7 @@ def download_latest(target: str) -> datetime:
                 # Atmospheric fields on pressure levels
                 
                 #'d',   # Divergence
-                'z', 	# Geopotential height
+                'gh', 	# Geopotential height
                 'q',	# Specific humidity
                 #'r',	# Relative humidity
                 't',	# Temperature 	K
@@ -85,6 +85,9 @@ def _grib_to_netcdf4(grib_path: str) -> None:
             pressures.append(ds)
         else:
             singles.append(ds)
+            
+    if 'gh' in pressures.variables:
+        pressures['gh'] = pressures['gh'] * 9.81
 
     pressures = xr.merge(pressures)
     singles = xr.merge(singles)
