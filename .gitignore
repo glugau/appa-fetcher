@@ -4,3 +4,4 @@ venv/
 data/
 *.pyc
 playground/
+.ipynb_checkpoints
